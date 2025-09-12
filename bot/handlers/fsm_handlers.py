@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
+from aiogram import Bot
 
 import re
 from datetime import datetime
@@ -140,10 +141,25 @@ async def finish_create_tag(call: CallbackQuery, state: FSMContext):
     await menu(call)
 
 
-@router.message(MessageBirthday.text)
-async def send_message_birthday(message: Message, state: FSMContext, call: CallbackQuery):
+@router.callback_query(F.data.startswith("message_about_birthday"))
+async def send_message_birthday(call: CallbackQuery, state: FSMContext):
+    user_with_birthday = call.data.split(' ')[1]
+    await state.update_data(birthday_boy=user_with_birthday)
+    await state.set_state(MessageBirthday.text)
+    await call.message.answer(f"Введите сообщение для всех пользователей, кроме именинника ({user_with_birthday}).")
 
-    await message.answer("Ваше сообщение было отправлено всем кроме пользователя у которого будет день рождения")
+
+@router.message(MessageBirthday.text)
+async def send_message_birthday(message: Message, state: FSMContext, bot: Bot):
+    markup = inline_keyborads.accept_event()
+    birthday_boy = (await state.get_data())["birthday_boy"]
+    users = DataBase.Get_users_for_send_message_about_birthday(birthday_boy.replace('@', ''))
+    for user in users:
+        await bot.send_message(chat_id=int(user[0]), text=message.text)
+    await state.update_data(users=users)
+    await state.update_data(text=message.text)
+    await message.answer(f"Ваше сообщение: {message.text} было отправлено всем кроме именинника ({birthday_boy}).",
+                         reply_markup=markup)
     await state.clear()
 
 

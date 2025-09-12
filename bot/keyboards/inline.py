@@ -43,7 +43,7 @@ def get_birth_date_keyboard(persons: list) -> InlineKeyboardMarkup:
     print(name)
     markup = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"Написать информацию по дню рождения {name}",
-                              callback_data="message_about_birthday")],
+                              callback_data=f"message_about_birthday {name}")],
         [InlineKeyboardButton(text="Назад", callback_data="start")]
     ])
     return markup
@@ -75,4 +75,9 @@ def choice_of_life_tag(tag_name: str) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="Да", callback_data=f"accept_delete {tag_name}")],
         [InlineKeyboardButton(text="Нет", callback_data=f"back_to_all_tags")]
     ])
+    return markup
+
+
+def accept_event() -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="ОК", callback_data="start")]])
     return markup

@@ -97,7 +97,7 @@ def Get_users_with_birth_date() -> list:
 
 
 def Get_users_for_send_message_about_birthday(name: str) -> list:
-    return execute_query("SELECT name_user WHERE name_user != ?", (name,))
+    return execute_query("SELECT id, name_user FROM Users WHERE name_user != ?", (name,))
 
 
 def Check_tag_name(name: str) -> bool:

@@ -96,12 +96,19 @@ async def get_birth_date(call: CallbackQuery):
                                  reply_markup=markup)
 
 
-@router.callback_query(F.data == "message_about_birthday")
-async def send_message_birthday(call: CallbackQuery):
-    pass
-
-
 @router.callback_query(F.data.startswith("accept_delete"))
 async def option_of_life_tag(call: CallbackQuery):
     DataBase.Delete_tag(call.data.split(' ')[1])
     await get_all_tags(call)
+
+
+@router.callback_query(F.data.startswith("activate_tag"))
+async def activate_tag(call: CallbackQuery):
+    answer = ""
+    tag_name = tag_name = call.data.split(' ')[1]
+    users = DataBase.Get_users_from_tag(tag_name)
+    for i in range(len(users)):
+        answer += "@" + str(users[i][0]) + " "
+    tag_description = DataBase.Get_tag_information(tag_name)[0]
+    answer += str(tag_description[0])
+    await call.message.answer(answer)
