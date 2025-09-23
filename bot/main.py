@@ -21,6 +21,7 @@ async def main():
     # запускаем бота
     try:
         await asyncio.gather(
+            bot.delete_webhook(drop_pending_updates=True),
             dp.start_polling(bot),
             birthday_notice(bot)  # отправка уведомлений о скором дне рождения
         )
