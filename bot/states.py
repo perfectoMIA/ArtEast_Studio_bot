@@ -13,3 +13,11 @@ class Tag(StatesGroup):
 
 class MessageBirthday(StatesGroup):
     text = State()
+
+
+class EditName(StatesGroup):
+    name = State()
+
+
+class EditDesicription(StatesGroup):
+    description = State()
