@@ -2,6 +2,6 @@
 from .handlers import router as main_router
 from .fsm_handlers import router as fsm_router
 
-routers = [main_router, fsm_router]
+routers = [fsm_router, main_router]
 
 __all__ = ['routers']
