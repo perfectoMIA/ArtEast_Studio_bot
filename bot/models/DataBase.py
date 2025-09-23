@@ -26,6 +26,10 @@ def Rename_tag(old_tag: str, new_tag: str) -> None:
     execute_query(f"UPDATE Tags SET name_tag = ? WHERE name_tag = ?", (new_tag, old_tag))
 
 
+def Edit_description(new_description: str, tag_name: str):
+    execute_query(f"UPDATE Tags SET description = ? WHERE name_tag = ?", (new_description, tag_name))
+
+
 # получить список всех тегов в бд
 def Get_tags() -> list:
     return execute_query("SELECT name_tag FROM Tags")
@@ -88,7 +92,7 @@ def Add_birth_date(birth_date: str, identifier: int) -> None:
 
 
 # получить описание тега из бд
-def Get_tag_information(name: str) -> list:
+def Get_tag_description(name: str) -> list:
     return execute_query("SELECT description FROM Tags WHERE name_tag = ?", (name,))
 
 
@@ -109,3 +113,26 @@ def Check_tag_name(name: str) -> bool:
 
 def Add_description_to_tag(tag_name: str, description: str):
     execute_query("UPDATE Tags SET description = ? WHERE name_tag = ?", (description, tag_name))
+
+
+def Get_users_not_in_tag(tag_name: str):
+    return execute_query("""
+        SELECT name_user 
+        FROM Users 
+        WHERE id NOT IN (
+            SELECT user_id 
+            FROM lnk_tag_name 
+            JOIN Tags ON lnk_tag_name.tag_id = Tags.id 
+            WHERE Tags.name_tag = ?
+        )
+    """, (tag_name,))
+
+
+def Get_users_not_in_the_list(list_users: list):
+    if not list_users:
+        return execute_query("SELECT name_user FROM Users")
+
+        # Создаем нужное количество плейсхолдеров
+    placeholders = ','.join(['?' for _ in list_users])
+    query = f"SELECT name_user FROM Users WHERE name_user NOT IN ({placeholders})"
+    return execute_query(query, tuple(list_users))
