@@ -21,3 +21,7 @@ class EditName(StatesGroup):
 
 class EditDesicription(StatesGroup):
     description = State()
+
+
+class StartInGroup(StatesGroup):
+    menu = State()
