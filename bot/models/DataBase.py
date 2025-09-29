@@ -104,6 +104,10 @@ def Get_users_for_send_message_about_birthday(name: str) -> list:
     return execute_query("SELECT id, name_user FROM Users WHERE name_user != ?", (name,))
 
 
+def Get_user_by_id(id_user: int):
+    return execute_query("SELECT name_user FROM Users WHERE id = ?", (id_user,))
+
+
 def Check_tag_name(name: str) -> bool:
     if execute_query("SELECT EXISTS (SELECT name_tag FROM Tags WHERE name_tag = ?)", (name,)) == [(0,)]:
         return False
