@@ -58,6 +58,9 @@ async def get_tag_information(call: CallbackQuery):
 @router.callback_query(F.data == "birth_date")
 async def get_birth_date(call: CallbackQuery):
     persons_with_birthday = DataBase.Get_users_with_birth_date()
+    for i in range(len(persons_with_birthday)):
+        if persons_with_birthday[i][1] == "None":
+            persons_with_birthday.pop(i)
     day = datetime.today()
     min_difference = math.inf
     next_persons = []  # список людей/человека у которого ближайший день рождения
@@ -169,3 +172,40 @@ async def delete_users(call: CallbackQuery):
 @router.message(~Command("start"), lambda message: message.chat.type == "private")
 async def delete_message(message: Message):
     await message.bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+
+
+@router.callback_query(F.data.startswith("spam_yes"))
+async def Change_Spam_on_yes(call: CallbackQuery):
+    day = call.data.split(' ')[1]
+    DataBase.Change_state_in_Spam(state="Заполнил", day=day, id_user=call.from_user.id)
+    await call.message.delete()
+
+
+@router.callback_query(F.data.startswith("spam_no"))
+async def Change_Spam_on_no(call: CallbackQuery):
+    day = call.data.split(' ')[1]
+    DataBase.Change_state_in_Spam(state="Не работал", day=day, id_user=call.from_user.id)
+    await call.message.delete()
+
+
+@router.callback_query(F.data == "watch_tracking_day")
+async def Get_watch_tracking_days(call: CallbackQuery):
+    markup = inline_keyborads.Get_watch_tracking_days()
+    await call.message.edit_text(text="Выберите день:", reply_markup=markup)
+
+
+@router.callback_query(F.data.startswith("day"))
+async def Get_watch_tracking_list(call: CallbackQuery):
+    markup = inline_keyborads.Get_watch_tracking_list()
+    day = call.data.split(' ')[1]  # название столбца
+    text = f"Список учёта часов за {day}:\n"
+    users = DataBase.Get_tracking_users(day)
+    for user in users:
+        text += f"@{user[0]} - {user[1]} "
+        if user[1] == "Не заполнял":
+            text += "❌\n"
+        elif user[1] == "Заполнил":
+            text += "✅\n"
+        elif user[1] == "Не работал":
+            text += "💤\n"
+    await call.message.edit_text(text=text, reply_markup=markup)
