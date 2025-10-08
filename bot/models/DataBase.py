@@ -66,7 +66,7 @@ def Link_user_tag(name: str, tag: str) -> None:
     id_tag = execute_query("SELECT id FROM Tags WHERE name_tag = ?", (tag,))  # возвращает кортеж
     id_user = id_user[0][0]  # Достаем ID пользователя из кортежа
     id_tag = id_tag[0][0]  # Достаем ID тега из кортежа
-    execute_query("INSERT INTO lnk_tag_name (tag_id, user_id) VALUES (?, ?)", (id_tag, id_user))
+    execute_query("INSERT INTO Lnk_tag_name (tag_id, user_id) VALUES (?, ?)", (id_tag, id_user))
 
 
 # удалить пользователя из тега
@@ -75,14 +75,14 @@ def Delete_user_from_tag(name: str, tag: str) -> None:
     id_tag = execute_query("SELECT id FROM Tags WHERE name_tag = ?", (tag,))  # возвращает кортеж
     id_user = id_user[0][0]  # Достаем ID пользователя из кортежа
     id_tag = id_tag[0][0]  # Достаем ID тега из кортежа
-    execute_query("DELETE FROM lnk_tag_name WHERE tag_id = ? AND user_id = ?", (id_tag, id_user))
+    execute_query("DELETE FROM Lnk_tag_name WHERE tag_id = ? AND user_id = ?", (id_tag, id_user))
 
 
 # получить список пользователей в теге
 def Get_users_from_tag(tag_name: str) -> list:
     return execute_query("SELECT name_user FROM Users "
-                         "JOIN lnk_tag_name ON Users.id = lnk_tag_name.user_id "
-                         "JOIN Tags ON lnk_tag_name.tag_id = Tags.id "
+                         "JOIN Lnk_tag_name ON Users.id = Lnk_tag_name.user_id "
+                         "JOIN Tags ON Lnk_tag_name.tag_id = Tags.id "
                          "WHERE Tags.name_tag = ?", (tag_name,))
 
 
@@ -125,8 +125,8 @@ def Get_users_not_in_tag(tag_name: str):
         FROM Users 
         WHERE id NOT IN (
             SELECT user_id 
-            FROM lnk_tag_name 
-            JOIN Tags ON lnk_tag_name.tag_id = Tags.id 
+            FROM Lnk_tag_name 
+            JOIN Tags ON Lnk_tag_name.tag_id = Tags.id 
             WHERE Tags.name_tag = ?
         )
     """, (tag_name,))
@@ -140,3 +140,35 @@ def Get_users_not_in_the_list(list_users: list):
     placeholders = ','.join(['?' for _ in list_users])
     query = f"SELECT name_user FROM Users WHERE name_user NOT IN ({placeholders})"
     return execute_query(query, tuple(list_users))
+
+
+def Get_users_to_spam():
+    return execute_query("SELECT id_user FROM Spam")
+
+
+def Get_count_column():
+    return execute_query("SELECT COUNT(*) FROM pragma_table_info('Spam')")[0][0]
+
+
+def Delete_column_by_name_in_Spam(day: str):
+    execute_query(f'ALTER TABLE Spam DROP COLUMN "{day}"')
+
+
+def Add_column_by_name_in_Spam(day: str):
+    execute_query(f'ALTER TABLE Spam ADD COLUMN "{day}" TEXT NOT NULL DEFAULT "Не заполнял"')
+
+
+def Change_state_in_Spam(state: str, day: str, id_user: int):
+    execute_query(f'UPDATE Spam SET "{day}" = "{state}" WHERE id_user = {id_user}')
+
+
+def Check_admin(id_user: int) -> bool:
+    return True if execute_query(f"SELECT * FROM Users WHERE id = {id_user} AND is_admin = 'Yes'") != [] else False
+
+
+def Get_tracking_days():
+    return execute_query('SELECT name FROM pragma_table_info("Spam")')
+
+
+def Get_tracking_users(day: str):
+    return execute_query(f'SELECT name_user, "{day}" FROM Spam')
