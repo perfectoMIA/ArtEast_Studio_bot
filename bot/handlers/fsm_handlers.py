@@ -291,5 +291,3 @@ async def edit_description(message: Message, state: FSMContext):
     await passive_functions.back_to_tag_information(tag_name=tag_name, message=message, state=state)
     await message.delete()
     await state.clear()
-
-print()
