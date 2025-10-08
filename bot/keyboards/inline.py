@@ -118,7 +118,7 @@ def edit_users(tag_name: str) -> InlineKeyboardMarkup:
     return markup
 
 
-def get_add_users(users: list, tag_name: str):
+def get_add_users(users: list, tag_name: str) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(inline_keyboard=[[]])
     for user in users:
         markup.inline_keyboard.append([InlineKeyboardButton(text=f"@{user[0]}",
@@ -128,11 +128,43 @@ def get_add_users(users: list, tag_name: str):
     return markup
 
 
-def get_delete_users(users: list, tag_name: str):
+def get_delete_users(users: list, tag_name: str) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(inline_keyboard=[[]])
     for user in users:
         markup.inline_keyboard.append([InlineKeyboardButton(text=f"@{user[0]}",
                                                             callback_data=f"delete_user {tag_name} {user[0]}")])
     markup.inline_keyboard.append([InlineKeyboardButton(text="закончить выбор",
                                                         callback_data=f"edit_users {tag_name}")])
+    return markup
+
+
+def spam_mailing(day: str) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Да", callback_data=f"spam_yes {day}")],
+        [InlineKeyboardButton(text="Не работал", callback_data=f"spam_no {day}")]
+                                                   ])
+    return markup
+
+
+def Start_tracking_days():
+    markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
+        text="Список учёта часов",
+        callback_data="watch_tracking_day")]])
+    return markup
+
+
+def Get_watch_tracking_days():
+    markup = InlineKeyboardMarkup(inline_keyboard=[[]])
+    days = DataBase.Get_tracking_days()[2:]  # столбцы после второго
+    print(days)
+    for day in days:
+        markup.inline_keyboard.append([InlineKeyboardButton(text=day[0], callback_data=f"day {day[0]}")])
+    markup.inline_keyboard.append([InlineKeyboardButton(text="Назад", callback_data="start")])
+    return markup
+
+
+def Get_watch_tracking_list():
+    markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
+        text="Назад",
+        callback_data="watch_tracking_day")]])
     return markup
