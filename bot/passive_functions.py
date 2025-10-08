@@ -1,5 +1,6 @@
 import asyncio
-from datetime import date, datetime
+import time
+from datetime import date, datetime, timedelta
 from aiogram import Bot
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -12,6 +13,9 @@ from keyboards import inline as inline_keyborads
 # отравка сообщений админам о скором дне рождения
 async def birthday_notice(bot: Bot):
     persons = DataBase.Get_users_with_birth_date()
+    for i in range(len(persons)):
+        if persons[i][1] == "None":
+            persons.pop(i)
     today = date.today()
     admins_id = str(ADMINS_ID).split(',')
     for person in persons:
@@ -20,6 +24,7 @@ async def birthday_notice(bot: Bot):
             for ID in admins_id:
                 await bot.send_message(chat_id=ID, text=f"через 7 дней день рождения у: @{person[0]}")
     await asyncio.sleep(86400)  # раз в сутки запускается
+    await birthday_notice(bot)
 
 
 async def back_to_tag_information(tag_name: str, message: Message, state: FSMContext):
@@ -39,3 +44,33 @@ async def back_to_tag_information(tag_name: str, message: Message, state: FSMCon
 
 def sort_birthday(user: tuple):
     return datetime.strptime(user[1], "%d.%m.%Y")
+
+
+async def spam_mailing(bot: Bot):
+    now = datetime.now()
+    if now.hour == 14:  # час в который бот будет рассылать сообщение
+        users = DataBase.Get_users_to_spam()
+        for i in range(len(users)):
+            users[i] = users[i][0]
+
+        count_column = DataBase.Get_count_column()
+        today = date.today()
+        if count_column > 5:
+            # удаление дня, который уже проверен
+            DataBase.Delete_column_by_name_in_Spam(str((today - timedelta(days=3)).strftime("%d.%m.%Y")))
+        # добавление нового дня, для заполнения часов
+        DataBase.Add_column_by_name_in_Spam(today.strftime("%d.%m.%Y"))
+        yesterday = today - timedelta(days=1)
+        markup = inline_keyborads.spam_mailing(yesterday.strftime("%d.%m.%Y"))
+
+        for user_id in users:
+            await bot.send_message(chat_id=user_id,
+                                   text=f"Ты заполнил рабочие часы за {yesterday.strftime('%d.%m.%Y')}?",
+                                   reply_markup=markup)
+        await asyncio.sleep(86400)
+        await spam_mailing(bot)
+    else:
+        next_day = now + timedelta(days=1)
+        next_day = next_day.replace(hour=14, microsecond=0, second=0, minute=0)
+        await asyncio.sleep((next_day - now).seconds)
+        await spam_mailing(bot)
