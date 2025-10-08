@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
 from aiogram import Bot
@@ -89,6 +89,16 @@ async def menu(update: Message | CallbackQuery, state: FSMContext = None):
             )
         await state.clear()
     markup = inline_keyborads.get_menu_keyboard()
+    flag_type_chat = False
+    if isinstance(update, CallbackQuery) and update.message.chat.type == "private":
+        flag_type_chat = True
+    elif isinstance(update, Message) and update.chat.type == "private":
+        flag_type_chat = True
+    if DataBase.Check_admin(update.from_user.id) and flag_type_chat == True:
+        # если пользователь админ, то добавляем доп кнопку
+        markup.inline_keyboard.append([InlineKeyboardButton(
+            text="Список учёта часов",
+            callback_data="watch_tracking_day")])
     text = "Выбери что ты хочешь сделать:"
     if isinstance(update, CallbackQuery):
         await update.message.edit_text(text=text, reply_markup=markup, )
@@ -204,7 +214,7 @@ async def send_message_birthday(message: Message, state: FSMContext, bot: Bot):
         await bot.send_message(chat_id=int(user[0]), text=message.text)
     await state.update_data(users=users)
     await state.update_data(text=message.text)
-    await message.answer(f"Ваше сообщение: {message.text} было отправлено всем кроме именинника ({birthday_boy}).",
+    await message.answer(f'Ваше сообщение: "{message.text}" было отправлено всем кроме именинника ({birthday_boy}).',
                          reply_markup=markup)
     await state.clear()
 
@@ -281,3 +291,5 @@ async def edit_description(message: Message, state: FSMContext):
     await passive_functions.back_to_tag_information(tag_name=tag_name, message=message, state=state)
     await message.delete()
     await state.clear()
+
+print()
