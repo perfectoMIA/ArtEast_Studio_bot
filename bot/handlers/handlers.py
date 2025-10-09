@@ -58,9 +58,12 @@ async def get_tag_information(call: CallbackQuery):
 @router.callback_query(F.data == "birth_date")
 async def get_birth_date(call: CallbackQuery):
     persons_with_birthday = DataBase.Get_users_with_birth_date()
-    for i in range(len(persons_with_birthday)):
+    i = 0
+    while i < len(persons_with_birthday):  # удаляем всех пользователей без др
         if persons_with_birthday[i][1] == "None":
             persons_with_birthday.pop(i)
+        else:
+            i += 1
     day = datetime.today()
     min_difference = math.inf
     next_persons = []  # список людей/человека у которого ближайший день рождения
