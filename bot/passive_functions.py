@@ -5,19 +5,23 @@ from aiogram import Bot
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from models import DataBase
-from config import ADMINS_ID
-from keyboards import inline as inline_keyborads
+from bot.models import DataBase
+from bot.keyboards import inline as inline_keyborads
 
 
 # отравка сообщений админам о скором дне рождения
 async def birthday_notice(bot: Bot):
     persons = DataBase.Get_users_with_birth_date()
-    for i in range(len(persons)):
+    i = 0
+    while i < len(persons):  # удаляем всех пользователей без др
         if persons[i][1] == "None":
             persons.pop(i)
+        else:
+            i += 1
     today = date.today()
-    admins_id = str(ADMINS_ID).split(',')
+    admins_id = DataBase.Get_admins_id()
+    for i in range(len(admins_id)):
+        admins_id[i] = admins_id[i][0]
     for person in persons:
         birthday = datetime.strptime(person[1], "%d.%m.%Y")
         if today.month == birthday.month and today.day + 7 == birthday.day:
@@ -48,7 +52,7 @@ def sort_birthday(user: tuple):
 
 async def spam_mailing(bot: Bot):
     now = datetime.now()
-    if now.hour == 14:  # час в который бот будет рассылать сообщение
+    if now.hour == 00:  # час в который бот будет рассылать сообщение
         users = DataBase.Get_users_to_spam()
         for i in range(len(users)):
             users[i] = users[i][0]
@@ -71,6 +75,6 @@ async def spam_mailing(bot: Bot):
         await spam_mailing(bot)
     else:
         next_day = now + timedelta(days=1)
-        next_day = next_day.replace(hour=14, microsecond=0, second=0, minute=0)
+        next_day = next_day.replace(hour=00, microsecond=0, second=0, minute=0)
         await asyncio.sleep((next_day - now).seconds)
         await spam_mailing(bot)
