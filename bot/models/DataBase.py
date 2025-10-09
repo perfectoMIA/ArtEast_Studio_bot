@@ -1,9 +1,10 @@
 import sqlite3
 
+from bot.config import DB_PATH
+
 
 def execute_query(query: str, params: tuple = ()) -> list:
-    with sqlite3.connect("C:\\Users\\user\\Desktop\\neotsort\\botik\\ArtEast_Studio_bot\\bot\\models\\"
-                         "artEast_Studio_db.db") as connection:
+    with sqlite3.connect(f"{DB_PATH}") as connection:
         cursor = connection.cursor()
         cursor.execute(query, params)
         if query.strip().upper().startswith('SELECT'):
@@ -164,6 +165,10 @@ def Change_state_in_Spam(state: str, day: str, id_user: int):
 
 def Check_admin(id_user: int) -> bool:
     return True if execute_query(f"SELECT * FROM Users WHERE id = {id_user} AND is_admin = 'Yes'") != [] else False
+
+
+def Get_admins_id():
+    return execute_query("SELECT id FROM Users WHERE is_admin = 'Yes'")
 
 
 def Get_tracking_days():
