@@ -3,9 +3,9 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from handlers import routers
-from config import BOT_TOKEN
-from passive_functions import birthday_notice, spam_mailing
+from bot.handlers import routers
+from bot.config import BOT_TOKEN
+from bot.passive_functions import birthday_notice, spam_mailing
 
 
 # Функция запуска бота
@@ -24,7 +24,8 @@ async def main():
             bot.delete_webhook(drop_pending_updates=True),
             dp.start_polling(bot),
             birthday_notice(bot),  # отправка уведомлений о скором дне рождения
-            spam_mailing(bot)  # отправка сообщеий о заполнении рабочих часов за день
+            spam_mailing(bot),  # отправка сообщеий о заполнении рабочих часов за день
+            return_exceptions=True
         )
     finally:
         await bot.session.close()
