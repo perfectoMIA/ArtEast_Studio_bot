@@ -8,7 +8,7 @@ import asyncio
 import re
 from datetime import datetime
 
-from bot.config import BOT_TOKEN
+from bot.config import BOT_TOKEN, CHAT_ID
 from bot.models import DataBase
 from bot.states import BirthDate, Tag, MessageBirthday, EditName, EditDesicription, StartInGroup
 import bot.keyboards.inline as inline_keyborads
@@ -21,14 +21,21 @@ bot = Bot(token=BOT_TOKEN)
 # Обработчик команды /start только в личных сообщениях
 @router.message(Command("start"), lambda message: message.chat.type == "private", StateFilter(None))
 async def start_handler(message: Message, state: FSMContext):
-    try:
-        DataBase.Add_user(message.from_user.id, message.from_user.username)
-        sent_message = await message.answer("Я успешно получил твои данные и занёс их в базу! "
-                                            "Введи свою дату рождения в формате: дд.мм.гггг")
-    except Exception as e:
+    user_id = message.from_user.id
+    try:  # проверка пользователя на наличии в группе ArtEast studio (работает на всех кроме владельца бота)
+        await bot.get_chat_member(chat_id=CHAT_ID, user_id=user_id)
+        try:
+            DataBase.Add_user(message.from_user.id, message.from_user.username)
+            sent_message = await message.answer("Я успешно получил твои данные и занёс их в базу! "
+                                                "Введи свою дату рождения в формате: дд.мм.гггг")
+        except Exception as e:
+            print(type(e), e)
+            return await menu(message)
+        await state.set_state(BirthDate.birth_date)
+    except Exception as e:  # если пользователя нет в нужной группе, то мы не регестрируем его
         print(type(e), e)
-        return await menu(message)
-    await state.set_state(BirthDate.birth_date)
+        await message.answer("Вы не можете зарегестрироваться в этом Telegram bot, "
+                             "так как не являетесь участником группы ArtEast studio")
 
 
 # /start в группе
