@@ -23,15 +23,19 @@ bot = Bot(token=BOT_TOKEN)
 async def start_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     try:  # проверка пользователя на наличии в группе ArtEast studio (работает на всех кроме владельца бота)
-        await bot.get_chat_member(chat_id=CHAT_ID, user_id=user_id)
-        try:
-            DataBase.Add_user(message.from_user.id, message.from_user.username)
-            sent_message = await message.answer("Я успешно получил твои данные и занёс их в базу! "
-                                                "Введи свою дату рождения в формате: дд.мм.гггг")
-        except Exception as e:
-            print(type(e), e)
-            return await menu(message)
-        await state.set_state(BirthDate.birth_date)
+        data = await bot.get_chat_member(chat_id=CHAT_ID, user_id=user_id)
+        if data.status != "left":
+            try:
+                DataBase.Add_user(message.from_user.id, message.from_user.username)
+                sent_message = await message.answer("Я успешно получил твои данные и занёс их в базу! "
+                                                    "Введи свою дату рождения в формате: дд.мм.гггг")
+            except Exception as e:
+                print(type(e), e)
+                return await menu(message)
+            await state.set_state(BirthDate.birth_date)
+        else:
+            await message.answer("Вы не можете зарегестрироваться в этом Telegram bot, "
+                                 "так как не являетесь участником группы ArtEast studio")
     except Exception as e:  # если пользователя нет в нужной группе, то мы не регестрируем его
         print(type(e), e)
         await message.answer("Вы не можете зарегестрироваться в этом Telegram bot, "
