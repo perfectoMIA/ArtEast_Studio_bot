@@ -175,7 +175,6 @@ async def delete_users(call: CallbackQuery):
 async def get_check(message: Message):
     # если пользователь уже скинул чек, то просто удаляем его сообщение
     if DataBase.Check_sent_money_person(message.from_user.id) is True:
-        print("boba")
         await message.bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     else:
         chat_id = RECEIPT_RECIPIENT

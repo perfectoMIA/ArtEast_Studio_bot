@@ -1,3 +1,3 @@
 .env
 *.db
-bot/TEXT_SPAM_MONEY.txt
+TEXT_SPAM_MONEY.txt
