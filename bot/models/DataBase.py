@@ -177,3 +177,28 @@ def Get_tracking_days():
 
 def Get_tracking_users(day: str):
     return execute_query(f'SELECT name_user, "{day}" FROM Spam')
+
+
+def Get_users_ids():
+    return execute_query("SELECT id FROM Users")
+
+
+# смена состояния при отправке денег
+def Sent_money(id_user: int):
+    execute_query(f"UPDATE Sponsors SET 'is_payment' = 'Yes' WHERE id_user = {id_user}")
+
+
+# каждый месяц сбрасывается список отправивших деньги
+def Reset_sent_money():
+    execute_query("UPDATE Sponsors SET 'is_payment' = 'No'")
+
+
+# проверка на тех, кто ещё не скинул деньги
+def Check_sent_money_group():
+    return execute_query("SELECT id_user FROM Sponsors WHERE is_payment = 'No'")
+
+
+# проверка конкретного пользователя на отправку денег
+def Check_sent_money_person(id_user: int) -> bool:
+    return True if execute_query(f"SELECT id_user FROM Sponsors "
+                                 f"WHERE is_payment = 'No' AND id_user = {id_user}") == [] else False
