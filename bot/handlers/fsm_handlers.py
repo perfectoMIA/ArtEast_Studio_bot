@@ -101,15 +101,20 @@ async def menu(update: Message | CallbackQuery, state: FSMContext = None):
         await state.clear()
     markup = inline_keyborads.get_menu_keyboard()
     flag_type_chat = False
+    # если мы находимся в личных сообщениях
     if isinstance(update, CallbackQuery) and update.message.chat.type == "private":
         flag_type_chat = True
     elif isinstance(update, Message) and update.chat.type == "private":
         flag_type_chat = True
-    if DataBase.Check_admin(update.from_user.id) and flag_type_chat == True:
-        # если пользователь админ, то добавляем доп кнопку
-        markup.inline_keyboard.append([InlineKeyboardButton(
+    if DataBase.Check_admin(update.from_user.id) and flag_type_chat:
+        # если пользователь админ, то добавляем доп кнопки
+        markup.inline_keyboard.append([InlineKeyboardButton(  # рассылка о заполнении рабочих часов
             text="Список учёта часов",
             callback_data="watch_tracking_day")])
+        markup.inline_keyboard.append([InlineKeyboardButton(  # рассылка о сдачи денег на дни рождения
+            text="Общая рассылка",
+            callback_data="spam_about_money"
+        )])
     text = "Выбери что ты хочешь сделать:"
     if isinstance(update, CallbackQuery):
         await update.message.edit_text(text=text, reply_markup=markup, )
