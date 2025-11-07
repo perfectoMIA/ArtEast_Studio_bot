@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.handlers import routers
 from bot.config import BOT_TOKEN
-from bot.passive_functions import birthday_notice, spam_mailing
+from bot.passive_functions import birthday_notice, spam_mailing, delete_message, Spam_about_money
 
 
 # Функция запуска бота
@@ -21,11 +21,13 @@ async def main():
     # запускаем бота
     try:
         await asyncio.gather(
-            bot.delete_webhook(drop_pending_updates=True),
+            bot.delete_webhook(drop_pending_updates=False),
             dp.start_polling(bot),
             birthday_notice(bot),  # отправка уведомлений о скором дне рождения
             spam_mailing(bot),  # отправка сообщеий о заполнении рабочих часов за день
+            Spam_about_money(bot),
             return_exceptions=True
+            #delete_message(bot)
         )
     finally:
         await bot.session.close()
