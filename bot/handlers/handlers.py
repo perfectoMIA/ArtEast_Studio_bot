@@ -1,6 +1,6 @@
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
-from aiogram import F
+from aiogram import F, Bot
 from datetime import datetime, date
 import math
 from aiogram.filters import Command
@@ -8,25 +8,23 @@ from aiogram.filters import Command
 from bot.models import DataBase
 import bot.keyboards.inline as inline_keyborads
 from bot.passive_functions import sort_birthday
-from bot.config import CHAT_ID
+from bot.config import CHAT_ID, RECEIPT_RECIPIENT
 
 router = Router()
 
 
-# новый пользователь в чате добавляется в бд.
-# @router.message(lambda message: message.new_chat_members is not None)
-# async def biba(message: Message):  # переименовать
-#     DataBase.Add_user(message.new_chat_members[0].id, message.new_chat_members[0].username)  # не робит
-#     spisok = DataBase.Get_users()
-#     await message.answer(f"Список пользователей: {spisok}")
+# новый пользователь в чате должен пройти регистрацию в боте (бот не может первым писать в лс).
+@router.message(lambda message: message.new_chat_members is not None)
+async def biba(message: Message):  # переименовать
+    await message.answer(f"Йо-хо-хо, @{message.new_chat_members[0].username} "
+                         f"ты оказался достоин добавления в эту группу! "
+                         f"Перейди в личные сообщения со мной и пройди регистрацию для дальнейшей работы на студии.")
 
 
 # покинувший чат пользователь удаляется из бд
-# @router.message(lambda message: message.left_chat_member)
-# async def boba(message: Message):  # переименовать
-#     DataBase.Delete_user(message.left_chat_member.username)
-#     spisok = DataBase.Get_users()
-#     await message.answer(f"Список пользователей: {spisok}")
+@router.message(lambda message: message.left_chat_member)
+async def boba(message: Message):  # переименовать
+    DataBase.Delete_user(message.left_chat_member.username)
 
 
 # показать все теги в виде кнопок
@@ -172,6 +170,25 @@ async def delete_users(call: CallbackQuery):
                                       f"Выберите кого хотите удалить", reply_markup=markup)
 
 
+# если пользователь скидывает фото или документ в бота об оплате
+@router.message(F.content_type.in_({'photo', 'document'}))
+async def get_check(message: Message):
+    # если пользователь уже скинул чек, то просто удаляем его сообщение
+    if DataBase.Check_sent_money_person(message.from_user.id) is True:
+        print("boba")
+        await message.bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    else:
+        chat_id = RECEIPT_RECIPIENT
+        if message.content_type == 'photo':
+            await message.bot.send_photo(chat_id=chat_id, photo=message.photo[-1].file_id,
+                                         caption=f"Чек от @{message.from_user.username}")
+        elif message.content_type == 'document':
+            await message.bot.send_document(chat_id=chat_id, document=message.document.file_id,
+                                            caption=f"Чек от @{message.from_user.username}")
+        DataBase.Sent_money(message.from_user.id)
+
+
+# удаление неперехваченных сообщений
 @router.message(~Command("start"), lambda message: message.chat.type == "private")
 async def delete_message(message: Message):
     await message.bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -212,3 +229,9 @@ async def Get_watch_tracking_list(call: CallbackQuery):
         elif user[1] == "Не работал":
             text += "💤\n"
     await call.message.edit_text(text=text, reply_markup=markup)
+
+
+# рассылка о скидывании денег
+@router.callback_query(F.data == "spam_about_money")
+async def Settings_pam_about_money(call: CallbackQuery, bot: Bot):
+    pass
