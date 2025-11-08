@@ -171,7 +171,7 @@ async def delete_users(call: CallbackQuery):
 
 
 # если пользователь скидывает фото или документ в бота об оплате
-@router.message(F.content_type.in_({'photo', 'document'}))
+@router.message(F.content_type.in_({'photo', 'document'}), lambda message: message.chat.type == "private")
 async def get_check(message: Message):
     # если пользователь уже скинул чек, то просто удаляем его сообщение
     if DataBase.Check_sent_money_person(message.from_user.id) is True:

@@ -104,7 +104,7 @@ async def delete_message(bot: Bot):
 async def Spam_about_money(bot: Bot):
     while True:
         today = datetime.now()
-        if today.day == 7 and today.hour == 2:  # 6 числа в 12:00 по Владивостоку - это 2:00 по серверу
+        if today.day == 7 and today.hour == 2:  # 7 число в 12:00 по Владивостоку - это 2:00 по серверу
             DataBase.Reset_sent_money()  # каждый месяц нужно заново скидывать деньги, поэтому сбарсываем флаг
             users = DataBase.Get_users_ids()
             for i in range(len(users)):
