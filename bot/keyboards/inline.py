@@ -156,8 +156,7 @@ def Start_tracking_days():
 
 def Get_watch_tracking_days():
     markup = InlineKeyboardMarkup(inline_keyboard=[[]])
-    days = DataBase.Get_tracking_days()[2:]  # столбцы после второго
-    print(days)
+    days = DataBase.Get_tracking_days()[2:-1]  # столбцы после второго и не включая последний
     for day in days:
         markup.inline_keyboard.append([InlineKeyboardButton(text=day[0], callback_data=f"day {day[0]}")])
     markup.inline_keyboard.append([InlineKeyboardButton(text="Назад", callback_data="start")])
