@@ -15,7 +15,7 @@ router = Router()
 
 # новый пользователь в чате должен пройти регистрацию в боте (бот не может первым писать в лс).
 @router.message(lambda message: message.new_chat_members is not None)
-async def send_message_new_members(message: Message):  # переименовать
+async def send_message_new_members(message: Message):
     for i in range(len(message.new_chat_members)):
         await message.answer(f"Йо-хо-хо, @{message.new_chat_members[i].username} "
                              f"ты оказался достоин добавления в эту группу! "
