@@ -5,7 +5,8 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.handlers import routers
 from bot.config import BOT_TOKEN
-from bot.passive_functions import birthday_notice, spam_mailing, delete_message, Spam_about_money
+from bot.passive_functions import (birthday_notice, spam_mailing, delete_message, Spam_about_money, tmp_func,
+                                   send_congratulation)
 
 
 # Функция запуска бота
@@ -24,8 +25,9 @@ async def main():
             bot.delete_webhook(drop_pending_updates=False),
             dp.start_polling(bot),
             birthday_notice(bot),  # отправка уведомлений о скором дне рождения
-            spam_mailing(bot),  # отправка сообщеий о заполнении рабочих часов за день
-            Spam_about_money(bot),
+            #spam_mailing(bot),  # отправка сообщеий о заполнении рабочих часов за день  10 ЧИСЛА РАЗБЛОКРИРОВАТЬ!!!!!!!!!!!!!!
+            Spam_about_money(bot),  # отправка сообщений о переводе денег на дни рождения
+            send_congratulation(bot),  # поздравление с новым годом, убрать после срабатывания
             return_exceptions=True
             #delete_message(bot)
         )
