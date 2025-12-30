@@ -15,10 +15,11 @@ router = Router()
 
 # новый пользователь в чате должен пройти регистрацию в боте (бот не может первым писать в лс).
 @router.message(lambda message: message.new_chat_members is not None)
-async def biba(message: Message):  # переименовать
-    await message.answer(f"Йо-хо-хо, @{message.new_chat_members[0].username} "
-                         f"ты оказался достоин добавления в эту группу! "
-                         f"Перейди в личные сообщения со мной и пройди регистрацию для дальнейшей работы на студии.")
+async def send_message_new_members(message: Message):  # переименовать
+    for i in range(len(message.new_chat_members)):
+        await message.answer(f"Йо-хо-хо, @{message.new_chat_members[i].username} "
+                             f"ты оказался достоин добавления в эту группу! "
+                             f"Перейди в личные сообщения со мной и пройди регистрацию для дальнейшей работы в студии.")
 
 
 # покинувший чат пользователь удаляется из бд
@@ -233,4 +234,13 @@ async def Get_watch_tracking_list(call: CallbackQuery):
 # рассылка о скидывании денег
 @router.callback_query(F.data == "spam_about_money")
 async def Settings_pam_about_money(call: CallbackQuery, bot: Bot):
+    pass
+
+
+@router.callback_query(F.data == "edit_users_lists")
+async def select_lists(call: CallbackQuery):
+    pass
+
+@router.callback_query(F.data == "delete_users_from_bot")
+async def delete_user_from_bot(call: CallbackQuery):
     pass
