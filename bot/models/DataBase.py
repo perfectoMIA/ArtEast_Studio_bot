@@ -202,3 +202,8 @@ def Check_sent_money_group():
 def Check_sent_money_person(id_user: int) -> bool:
     return True if execute_query(f"SELECT id_user FROM Sponsors "
                                  f"WHERE is_payment = 'No' AND id_user = {id_user}") == [] else False
+
+
+# получение id тех кому надо скидывться на др
+def Get_ids_sponsors():
+    return execute_query("SELECT id_user FROM Sponsors")
